@@ -84,28 +84,14 @@ userSchema.methods.comparePassword = async function (
 
 // Sign access token method
 userSchema.methods.SignAccessToken = function (): string {
-  const secret = process.env.ACCESS_TOKEN || process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error(
-      "Missing secret for signing access token. Set ACCESS_TOKEN or JWT_SECRET in environment variables."
-    );
-  }
-
-  return jwt.sign({ id: this._id }, secret, {
+  return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN as string, {
     expiresIn: "5m",
   });
 };
 
 // Sign refresh token method
 userSchema.methods.SignRefreshToken = function (): string {
-  const secret = process.env.REFRESH_TOKEN || process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error(
-      "Missing secret for signing refresh token. Set REFRESH_TOKEN or JWT_SECRET in environment variables."
-    );
-  }
-
-  return jwt.sign({ id: this._id }, secret, {
+  return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN as string, {
     expiresIn: "3d",
   });
 };

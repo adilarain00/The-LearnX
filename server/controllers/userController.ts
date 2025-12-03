@@ -51,7 +51,7 @@ export const registerNewUser = catchAsyncError(
       await sendMail({
         name,
         email,
-        subject: "Activate Your LearnX Account",
+        subject: "Activate Your Learneazy Account",
         activationCode,
         data: {
           user: { name: user.name },
@@ -185,6 +185,7 @@ export const authenticateUser = catchAsyncError(
 export const logoutCurrentUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Clear cookies with proper options for production
       const clearCookieOptions = {
         httpOnly: true,
         sameSite:
@@ -199,6 +200,7 @@ export const logoutCurrentUser = catchAsyncError(
       res.clearCookie("access_token", clearCookieOptions);
       res.clearCookie("refresh_token", clearCookieOptions);
 
+      // Also try clearing with empty values as fallback
       res.cookie("access_token", "", { maxAge: 1, ...clearCookieOptions });
       res.cookie("refresh_token", "", { maxAge: 1, ...clearCookieOptions });
 
@@ -210,7 +212,7 @@ export const logoutCurrentUser = catchAsyncError(
       res.status(200).json({
         success: true,
         message:
-          "You have been successfully signed out. Thank you for using LearnX!",
+          "You have been successfully signed out. Thank you for using Learneazy!",
       });
     } catch (error: any) {
       return next(new errorHandler("Logout failed. Please try again.", 500));
@@ -223,17 +225,10 @@ export const refreshUserAccessToken = catchAsyncError(
     try {
       const refresh_token = req.cookies.refresh_token as string;
 
-      const refreshSecret = process.env.REFRESH_TOKEN || process.env.JWT_SECRET;
-      if (!refreshSecret) {
-        return next(
-          new errorHandler(
-            "Server misconfiguration: missing refresh token secret. Please set REFRESH_TOKEN or JWT_SECRET in your environment.",
-            500
-          )
-        );
-      }
-
-      const decoded: any = jwt.verify(refresh_token, refreshSecret) as JwtPayload;
+      const decoded: any = jwt.verify(
+        refresh_token,
+        process.env.REFRESH_TOKEN as string
+      ) as JwtPayload;
       if (!decoded) {
         return next(
           new errorHandler("Invalid refresh token. Please log in again.", 401)
@@ -254,25 +249,21 @@ export const refreshUserAccessToken = catchAsyncError(
         );
       }
 
-      const accessSecret = process.env.ACCESS_TOKEN || process.env.JWT_SECRET;
-      const refreshSecret2 = process.env.REFRESH_TOKEN || process.env.JWT_SECRET;
+      const accessToken = jwt.sign(
+        { id: user._id },
+        process.env.ACCESS_TOKEN as string,
+        {
+          expiresIn: "5m",
+        }
+      );
 
-      if (!accessSecret || !refreshSecret2) {
-        return next(
-          new errorHandler(
-            "Server misconfiguration: missing access / refresh token secret. Please set ACCESS_TOKEN or JWT_SECRET (for access) and REFRESH_TOKEN or JWT_SECRET (for refresh).",
-            500
-          )
-        );
-      }
-
-      const accessToken = jwt.sign({ id: user._id }, accessSecret, {
-        expiresIn: "5m",
-      });
-
-      const refreshToken = jwt.sign({ id: user._id }, refreshSecret2, {
-        expiresIn: "3d",
-      });
+      const refreshToken = jwt.sign(
+        { id: user._id },
+        process.env.REFRESH_TOKEN as string,
+        {
+          expiresIn: "3d",
+        }
+      );
 
       req.user = user;
 
@@ -314,6 +305,7 @@ export const authenticateWithSocialMedia = catchAsyncError(
         });
         sendToken(newUser, 200, res);
       } else {
+        // Update existing user's avatar if they don't have one
         if (!user.avatar?.url && avatar) {
           user.avatar = {
             public_id: "",
