@@ -81,61 +81,22 @@ export const updateWebsiteLayoutByAdmin = catchAsyncError(
         const bannerData: any = await Layout.findOne({ type: "Banner" });
 
         const { image, title, subTitle } = req.body;
-
-        if (!bannerData) {
-          let newImage = { public_id: "", url: "" };
-          if (image && !image.startsWith("https")) {
-            const upload = await cloudinary.v2.uploader.upload(image, {
-              folder: "layout",
-            });
-            newImage = { public_id: upload.public_id, url: upload.secure_url };
-          } else if (image && image.startsWith("https")) {
-            newImage = { public_id: "", url: image };
-          }
-
-          await Layout.create({
-            type: "Banner",
-            banner: {
-              image: newImage,
-              title,
-              subTitle,
-            },
+        const data = image.startsWith("https")
+          ? bannerData
+          : await cloudinary.v2.uploader.upload(image, {
+            folder: "layout",
           });
 
-          return;
-        }
-
-        let finalImage = bannerData.banner?.image || { public_id: "", url: "" };
-
-        try {
-          if (image && typeof image === "string") {
-            if (image.startsWith("https")) {
-              finalImage = bannerData.banner?.image || finalImage;
-            } else if (image.startsWith("data:") || image.includes("base64,")) {
-              const upload = await cloudinary.v2.uploader.upload(image, {
-                folder: "layout",
-              });
-
-              if (
-                bannerData.banner?.image?.public_id &&
-                bannerData.banner.image.public_id !== upload.public_id
-              ) {
-                try {
-                  await cloudinary.v2.uploader.destroy(bannerData.banner.image.public_id);
-                } catch (e) {
-                  // non-fatal; keep going
-                }
-              }
-
-              finalImage = { public_id: upload.public_id, url: upload.secure_url };
-            }
-          }
-        } catch (err) {
-          return next(new errorHandler("Image upload failed. Please try again.", 500));
-        }
-
         const banner = {
-          image: finalImage,
+          type: "Banner",
+          image: {
+            public_id: image.startsWith("https")
+              ? bannerData.banner.image.public_id
+              : data?.public_id,
+            url: image.startsWith("https")
+              ? bannerData.banner.image.url
+              : data?.secure_url,
+          },
           title,
           subTitle,
         };

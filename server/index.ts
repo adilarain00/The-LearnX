@@ -34,7 +34,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://LearnX.vercel.app",
+    origin: process.env.FRONTEND_URL || "https://the-learnx.vercel.app",
     credentials: true,
   })
 );
@@ -46,8 +46,8 @@ app.use(cookieParser());
 
 // Rate limiting middleware
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 100 requests per windowMs
+  windowMs: process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
+  max: process.env.RATE_LIMIT_MAX || 100,
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       success: false,
@@ -62,7 +62,7 @@ app.use(limiter);
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "LearnX API is running successfully!",
+    message: "LearnEazy API is running successfully!",
   });
 });
 

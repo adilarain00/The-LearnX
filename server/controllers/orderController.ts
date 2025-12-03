@@ -141,9 +141,9 @@ export const createStripePaymentIntent = catchAsyncError(
       const myPayment = await stripe.paymentIntents.create({
         amount: req.body.amount,
         currency: "USD",
-        description: "LearnX Course Payment",
+        description: "Learneazy Course Payment",
         metadata: {
-          company: "LearnX",
+          company: "Learneazy",
         },
         automatic_payment_methods: {
           enabled: true,

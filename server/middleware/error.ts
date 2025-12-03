@@ -20,9 +20,8 @@ export const errorMiddleware = (
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue)[0];
     const value = err.keyValue[field];
-    const message = `${
-      field.charAt(0).toUpperCase() + field.slice(1)
-    } '${value}' already exists. Please use a different ${field}.`;
+    const message = `${field.charAt(0).toUpperCase() + field.slice(1)
+      } '${value}' already exists. Please use a different ${field}.`;
     err = new errorHandler(message, 409);
   }
 

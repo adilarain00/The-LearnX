@@ -8,9 +8,9 @@ export const initSocketServer = (server: http.Server) => {
   io.on("connection", (socket) => {
     console.log("A user connected with ID:", socket.id);
 
-    // Listen for 'notification' event from the frontend
+
     socket.on("notification", (data) => {
-      // Broadcast the notification data to all connected clients (admin dashboard)
+
       io.emit("newNotification", data);
     });
 
