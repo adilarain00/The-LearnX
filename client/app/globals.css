@@ -5,6 +5,10 @@
 /* ------------------------------
    Base Reset
 ------------------------------ */
+:root {
+  --font-poppins: 'Poppins', sans-serif;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -20,8 +24,8 @@ body {
   @apply bg-background-light text-textColor-light dark:bg-background-dark dark:text-textColor-dark antialiased leading-relaxed;
 }
 
-.font-Poppins {
-  font-family: var(--font-Poppins);
+.font-poppins {
+  font-family: var(--font-poppins);
 }
 
 /* Disable number field arrows */

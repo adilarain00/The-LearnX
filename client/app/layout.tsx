@@ -1,22 +1,23 @@
-"use client";
-import "./globals.css";
-import { Loader } from "./components";
-import { Toaster } from "react-hot-toast";
-import { Poppins } from "next/font/google";
-import React, { FC, useEffect } from "react";
-import { SessionProvider } from "next-auth/react";
-import { ReduxProvider } from "./providers/ReduxProvider";
-import { ThemeProvider } from "./providers/ThemeProvider";
-import { useLoadUserQuery } from "@/redux/features/api/apiSlice";
+'use client';
+import './globals.css';
+import { Loader } from './components';
+import { Toaster } from 'react-hot-toast';
+import { Poppins } from 'next/font/google';
+import React, { FC, useEffect } from 'react';
+import { SessionProvider } from 'next-auth/react';
+import { ReduxProvider } from './providers/ReduxProvider';
+import { ThemeProvider } from './providers/ThemeProvider';
+import { useLoadUserQuery } from '@/redux/features/api/apiSlice';
 
-import socketIO from "socket.io-client";
-const ENDPOINT = process.env.NEXT_PUBLIC_SOCKET_SERVER_URI || "";
-const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
+import socketIO from 'socket.io-client';
+const ENDPOINT = process.env.NEXT_PUBLIC_SOCKET_SERVER_URI || '';
+const socketId = socketIO(ENDPOINT, { transports: ['websocket'] });
 
+// ⭐ Correct font usage (no Google CDN calls)
 const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-Poppins",
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-poppins',
 });
 
 export default function RootLayout({
@@ -25,18 +26,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' className={poppins.variable} suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel='icon' href='/favicon.ico' />
       </head>
-      <body
-        className={`${poppins.variable} !bg-white bg-no-repeat dark:bg-gradient-to-b dark:from-gray-900 dark:to-black duration-300`}
-      >
+      <body className='font-poppins !bg-white bg-no-repeat dark:bg-gradient-to-b dark:from-gray-900 dark:to-black duration-300'>
         <ReduxProvider>
           <SessionProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
               <Custom>{children}</Custom>
-              <Toaster position="top-center" reverseOrder={false} />
+              <Toaster position='top-center' reverseOrder={false} />
             </ThemeProvider>
           </SessionProvider>
         </ReduxProvider>
@@ -49,7 +48,7 @@ const Custom: FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoading } = useLoadUserQuery({});
 
   useEffect(() => {
-    socketId.on("connection", () => {});
+    socketId.on('connection', () => {});
   }, []);
 
   return <>{isLoading ? <Loader /> : <div>{children}</div>}</>;
